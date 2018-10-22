@@ -1,0 +1,10 @@
+---
+lighttpd_modules:
+  ssi:
+    exec: disable
+    extension:
+      - .html
+      - .shtml
+    #content-type: text/html
+    #conditional-requests: disable
+    #recursion-max: 0
