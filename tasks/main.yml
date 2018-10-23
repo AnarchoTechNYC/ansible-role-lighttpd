@@ -1,6 +1,6 @@
 ---
 - name: Install Lighttpd.
-  apt:
+  package:
     name: lighttpd
     state: present
 
