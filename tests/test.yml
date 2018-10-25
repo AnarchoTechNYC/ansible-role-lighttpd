@@ -2,7 +2,6 @@
 ---
 - name: Test role.
   hosts: localhost
-  become: yes
   roles:
     - ansible-role-lighttpd
   
