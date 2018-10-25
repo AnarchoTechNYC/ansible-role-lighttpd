@@ -2,8 +2,7 @@
 language: minimal
 
 env:
-  - docker_repo: raspbian/stretch
-  - docker_repo: raspbian/jessie
+  - docker_repo: resin/rpi-raspbian
   - docker_repo: geerlingguy/docker-debian9-ansible
   - docker_repo: geerlingguy/docker-debian8-ansible
   - docker_repo: geerlingguy/docker-centos7-ansible
@@ -14,29 +13,36 @@ env:
 matrix:
   # TODO: Fix these failures?
   allow_failures:
+    # TODO: Fixing the Raspbian build is going to require QEMU and
+    #       binfmt_misc support. See:
+    #       https://www.balena.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/
+    #       In the mean time, allow this to fail.
+    - env: docker_repo=resin/rpi-raspbian
     - env: docker_repo=geerlingguy/docker-centos7-ansible
     - env: docker_repo=geerlingguy/docker-fedora27-ansible
     - env: docker_repo=geerlingguy/docker-ubuntu1604-ansible
 
 install:
-  - docker pull ${docker_repo}
+  - docker image pull ${docker_repo}
   - container_id=$(mktemp)
   - >
-    docker run --detach --privileged
+    docker container run --detach --privileged
     --volume /sys/fs/cgroup:/sys/fs/cgroup:ro
     --volume ${PWD}:/etc/ansible/roles/ansible-role-lighttpd:ro
     --publish 80:80
     ${docker_repo}:latest > ${container_id}
 
   # Bootstrap to ensure Ansible is available in the container.
+  # This is to ensure that the containers not already pre-imaged with
+  # Ansible installed (i.e., Raspbian image) will have it available.
   - >
-    docker exec --tty $(cat ${container_id}) env TERM=xterm
-    "ansible --version"
+    docker container exec --tty $(cat ${container_id}) env TERM=xterm
+    pip install ansible
 
 script:
   # Check Ansible role/playbook syntax.
   - >
-    docker exec --tty "$(cat ${container_id})" env TERM=xterm
+    docker container exec --tty "$(cat ${container_id})" env TERM=xterm
     ansible-playbook --syntax-check /etc/ansible/roles/ansible-role-lighttpd/tests/test.yml
 
   # Ensure the role/playbook runs without errors or failures.
@@ -59,4 +65,4 @@ script:
   - curl http://localhost/
 
 after_script:
-  - docker rm -f "$(cat ${container_id})"
+  - docker container rm -f "$(cat ${container_id})"
