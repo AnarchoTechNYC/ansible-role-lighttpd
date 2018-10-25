@@ -2,29 +2,36 @@
 language: minimal
 
 env:
-  - distro: debian9
-  - distro: debian8
-  - distro: centos7
-  - distro: fedora27
-  - distro: ubuntu1804
-  - distro: ubuntu1604
+  - docker_repo: raspbian/stretch
+  - docker_repo: raspbian/jessie
+  - docker_repo: geerlingguy/docker-debian9-ansible
+  - docker_repo: geerlingguy/docker-debian8-ansible
+  - docker_repo: geerlingguy/docker-centos7-ansible
+  - docker_repo: geerlingguy/docker-fedora27-ansible
+  - docker_repo: geerlingguy/docker-ubuntu1804-ansible
+  - docker_repo: geerlingguy/docker-ubuntu1604-ansible
 
 matrix:
   # TODO: Fix these failures?
   allow_failures:
-    - env: distro=centos7
-    - env: distro=fedora27
-    - env: distro=ubuntu1604
+    - env: docker_repo=geerlingguy/docker-centos7-ansible
+    - env: docker_repo=geerlingguy/docker-fedora27-ansible
+    - env: docker_repo=geerlingguy/docker-ubuntu1604-ansible
 
 install:
-  - docker pull geerlingguy/docker-${distro}-ansible
+  - docker pull ${docker_repo}
   - container_id=$(mktemp)
   - >
     docker run --detach --privileged
     --volume /sys/fs/cgroup:/sys/fs/cgroup:ro
     --volume ${PWD}:/etc/ansible/roles/ansible-role-lighttpd:ro
     --publish 80:80
-    geerlingguy/docker-${distro}-ansible:latest > ${container_id}
+    ${docker_repo}:latest > ${container_id}
+
+  # Bootstrap to ensure Ansible is available in the container.
+  - >
+    docker exec --tty $(cat ${container_id}) env TERM=xterm
+    "ansible --version"
 
 script:
   # Check Ansible role/playbook syntax.
