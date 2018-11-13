@@ -1,0 +1,5 @@
+{% if "include_shell" == option_key or "include" == option_key %}
+{{ option_key }} {{ option_value }}
+{% else %}
+{{ option_key }} = {% include "lighttpd-value.j2" %}
+{% endif %}

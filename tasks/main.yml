@@ -4,48 +4,12 @@
     name: lighttpd
     state: present
 
-- name: Remove Lighttpd HTTP server banner.
-  lineinfile:
-    path: /etc/lighttpd/lighttpd.conf
-    line: 'server.tag = ""'
-    state: present
-    # TODO:
-    #validate: "lighttpd -tt -f %s"
-  notify:
-    - Restart Lighttpd.
-
-- name: Configure Lighttpd mod_ssi.
-  when: lighttpd_modules.ssi is defined
-  lineinfile:
-    path: /etc/lighttpd/lighttpd.conf
-    line: "\t\"mod_ssi\","
-    insertbefore: '"mod_compress",$'
-    firstmatch: yes
-    # TODO:
-    #validate: "lighttpd -tt -f %s"
-  notify:
-    - Restart Lighttpd.
-
-- name: Disable Lighttpd mod_ssi exec.
-  when:
-    - lighttpd_modules.ssi is defined
-    - lighttpd_modules.ssi.exec == "disable"
-  lineinfile:
-    path: /etc/lighttpd/lighttpd.conf
-    line: 'ssi.exec = "disable"'
-    # TODO:
-    #validate: "lighttpd -tt -f %s"
-  notify:
-    - Restart Lighttpd.
-
-- name: Add Lighttpd mod_ssi extension configuration.
-  when:
-    - lighttpd_modules.ssi is defined
-    - lighttpd_modules.ssi.extension is defined
-  lineinfile:
-    path: /etc/lighttpd/lighttpd.conf
-    line: "ssi.extension = ( \"{{ lighttpd_modules.ssi.extension | join('\", \"') }}\" )"
-    # TODO:
-    #validate: "lighttpd -tt -f %s"
-  notify:
-    - Restart Lighttpd.
+- name: Write Lighttpd configuration file.
+  template:
+    src: lighttpd.conf.j2
+    dest: /etc/lighttpd/lighttpd.conf
+    owner: root
+    group: root
+    mode: "640"
+    validate: "lighttpd -tt -f %s"
+  notify: Restart Lighttpd.
