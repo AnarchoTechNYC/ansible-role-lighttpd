@@ -1,21 +1,21 @@
-{% if option_value is string %}
-"{{ option_value }}"
-{% elif option_value is number %}
-{{ option_value }}
-{% elif option_value is sameas false %}
-"disabled"
-{% elif option_value is sameas true %}
-"enabled"
-{% elif option_value is sequence %}
+{% if module_value is string %}
+"{{ module_value }}"
+{% elif module_value is number %}
+{{ module_value }}
+{% elif module_value is sameas false %}
+"disable"
+{% elif module_value is sameas true %}
+"enable"
+{% elif module_value is sequence %}
 (
-{% for v in option_value %}
+{% for v in module_value %}
     "{{ v }}"{% if not loop.last %},{% endif %}{{''}}
 {% endfor %}
 )
-{% elif option_value is mapping %}
+{% elif module_value is mapping %}
 (
-{% for k, v in option_value.items() %}
-    "{{ k }}" = {% with option_value=v %}{% include "lighttpd-value.j2" %}{% endwith %}{% if not loop.last %},{% endif %}{{''}}
+{% for k, v in module_value.items() %}
+    "{{ k }}" = {% with module_value = v %}{% include "lighttpd-value.j2" %}{% endwith %}{% if not loop.last %},{% endif %}{{''}}
 {% endfor %}
 )
 {% endif %}

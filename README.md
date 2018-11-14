@@ -4,7 +4,7 @@ An [Ansible role](https://docs.ansible.com/ansible/latest/user_guide/playbooks_r
 
 # Configuring Lighttpd
 
-This role features a relatively thorough Jinja template implementation of [the Lighttpd configuration file format syntax](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#BNF-like-notation-of-the-basic-syntax). This means you can configure Lighttpd using the `lighttpd_config` list, whose items are dictionaries that map nearly one-to-one to the [Lighttpd configuration file options](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_ConfigurationOptions#Configuration-File-Options). This implementation supports arbitrarily deeply nested [conditionals](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#Conditional-Configuration), Lighttpd arrays, and simple [variables](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#Using-variables).
+This role features a relatively thorough Jinja template implementation of [the Lighttpd configuration file format syntax](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#BNF-like-notation-of-the-basic-syntax). This means you can configure Lighttpd using the `lighttpd_config` list, whose items are dictionaries (two-dimensional associative arrays) that map nearly one-to-one to the [Lighttpd module names and their keys](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_ConfigurationOptions#Configuration-File-Options). This implementation supports arbitrarily deeply nested [conditionals](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#Conditional-Configuration), Lighttpd arrays, and simple [variables](https://redmine.lighttpd.net/projects/lighttpd/wiki/Docs_Configuration#Using-variables).
 
 The most complex part of the implementation is conditionals, which use the keyword `conditional` as the Lighttpd option list item name. The item itself is a list of dictionaries, each with the following required keys:
 
@@ -22,19 +22,35 @@ Examples should help make this clear:
 1. Simple server bound to the alternate HTTP port, 8080.
     ```yml
     lighttpd_config:
-      - server.port: 8080
-      - server.document-root: "{{ lighttpd_server_home_dir }}/html"
+      - server:
+          port: 8080
+      - server:
+          document-root: "{{ lighttpd_server_home_dir }}/html"
+    ```
+    The above is equivalent to the Lighttpd configuration file:
+    ```
+    server.port = 8080
+    server.document-root: "/var/www/html"
     ```
 1. Simple virtual host configuration with the default document root different from a domain-specific document root:
     ```yml
     lighttpd_config:
-      - server.document-root: "{{ lighttpd_server_home_dir }}/html"
+      - server:
+          document-root: "{{ lighttpd_server_home_dir }}/html"
       - conditional:
         - field: '$HTTP["host"]'
           operator: '=~'
-          value: '(^|\.)example\.com$'
+          value: '(^|\.)example\.com$' # Single quotes to protect `\.`, which is a Jinja2 escape sequence.
           options:
-            - server.document-root: "{{ lighttpd_server_home_dir }}/example.com"
+            - server:
+                document-root: "{{ lighttpd_server_home_dir }}/example.com"
+    ```
+    The above is equivalent to the Lighttpd configuration file:
+    ```
+    server.document-root = "/var/www/html"
+    $HTTP["host"] =~ "(^|\.)example\.com$" {
+        server.document-root = "/var/www/html/example.com"
+    }
     ```
 
 See the [`defaults/main.yml`](defaults/main.yml) file for a more thorough example.
