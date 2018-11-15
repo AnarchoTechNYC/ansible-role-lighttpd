@@ -15,7 +15,7 @@
 {% elif module_value is mapping %}
 (
 {% for k, v in module_value.items() %}
-    "{{ k }}" = {% with module_value = v %}{% include "lighttpd-value.j2" %}{% endwith %}{% if not loop.last %},{% endif %}{{''}}
+    "{{ k }}" => {% with module_value = v %}{% include "lighttpd-value.j2" %}{% endwith %}{% if not loop.last %},{% endif %}{{''}}
 {% endfor %}
 )
 {% endif %}
