@@ -6,16 +6,16 @@
 "disable"
 {% elif module_value is sameas true %}
 "enable"
-{% elif module_value is sequence %}
-(
-{% for v in module_value %}
-    "{{ v }}"{% if not loop.last %},{% endif %}{{''}}
-{% endfor %}
-)
 {% elif module_value is mapping %}
 (
 {% for k, v in module_value.items() %}
     "{{ k }}" => {% with module_value = v %}{% include "lighttpd-value.j2" %}{% endwith %}{% if not loop.last %},{% endif %}{{''}}
+{% endfor %}
+)
+{% elif module_value is sequence %}
+(
+{% for v in module_value %}
+    "{{ v }}"{% if not loop.last %},{% endif %}{{''}}
 {% endfor %}
 )
 {% endif %}
