@@ -11,5 +11,10 @@
     owner: root
     group: root
     mode: "640"
-    validate: "lighttpd -tt -f %s"
+    # TODO: Figure out how to get validation to work when the
+    #       `include_shell` directive loads a relative path.
+    #       The issue is that Lighttpd will test against the
+    #       ansible `remote_tmp` path (usually `~/.ansible/tmp`)
+    #       but of course, there are no Lighttpd config files there.
+    #validate: "lighttpd -tt -f %s"
   notify: Restart Lighttpd.

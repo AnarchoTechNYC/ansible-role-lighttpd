@@ -1,21 +1,42 @@
+# Role defaults for the Lighttpd role match the Debian package config.
 ---
 lighttpd_server_username: "www-data"
 lighttpd_server_home_dir: "/var/www"
 
+# Lighttpd configuration convenience variables to allow for simpler
+# configuration of simple use cases.
+lighttpd_server_modules:
+  - mod_access
+  - mod_alias
+  - mod_compress
+  - mod_redirect
+lighttpd_server_document_root: "{{ lighttpd_server_home_dir }}/html"
+lighttpd_server_errorlog: /var/log/lighttpd/error.log
+lighttpd_server_port: 80
+lighttpd_server_index_file_names:
+  - index.php
+  - index.html
+  - index.lighttpd.html
+
+# Main Lighttpd configuration variable is a list because the order of
+# directives matters. Note that each list item is a dictionary with
+# one and only one key, which itself contains one and only one item.
 lighttpd_config:
+  # server.modules directive
   - server:
-      modules:
-        - mod_access
-        - mod_alias
-        - mod_compress
-        - mod_redirect
+      modules: "{{ lighttpd_server_modules }}"
+
+  # server.document-root directive
   - server:
-      document-root: "{{ lighttpd_server_home_dir }}/html"
+      document-root: "{{ lighttpd_server_document_root }}"
+
+  # server.upload-dirs directive
   - server:
       upload-dirs:
         - /var/cache/lighttpd/uploads
+
   - server:
-      errorlog: /var/log/lighttpd/error.log
+      errorlog: "{{ lighttpd_server_errorlog }}"
   - server:
       pid-file: /var/run/lighttpd.pid
   - server:
@@ -23,12 +44,9 @@ lighttpd_config:
   - server:
       groupname: "{{ lighttpd_server_username }}"
   - server:
-      port: 80
+      port: "{{ lighttpd_server_port }}"
   - index-file:
-      names:
-        - index.php
-        - index.html
-        - index.lighttpd.html
+      names: "{{ lighttpd_server_index_file_names }}"
   - url:
       access-deny:
         - "~"
@@ -46,6 +64,11 @@ lighttpd_config:
         - text/css
         - text/html
         - text/plain
+
+  # Note double quotations because this is actually a literal string.
+  # Lighttpd requires the value of `include_shell` to be quoted, and
+  # the `+` is interpreted by Lighttpd itself when it parses resulting
+  # template written from this variable.
   - include_shell: '"/usr/share/lighttpd/use-ipv6.pl " + server.port'
   - include_shell: '"/usr/share/lighttpd/create-mime.assign.pl"'
   - alias:
