@@ -32,7 +32,7 @@ Note that Lighttpd is strict with regard to quote style. It exclusively uses dou
 Examples should help make this clear:
 
 1. Simple server bound to the alternate HTTP port, 8080.
-    ```yml
+    ```yaml
     lighttpd_config:
       - server:
           port: 8080
@@ -45,7 +45,7 @@ Examples should help make this clear:
     server.document-root: "/var/www/html"
     ```
 1. Simple virtual host configuration with the default document root different from a domain-specific document root:
-    ```yml
+    ```yaml
     lighttpd_config:
       - server:
           document-root: "{{ lighttpd_server_home_dir }}/html"
@@ -65,4 +65,4 @@ Examples should help make this clear:
     }
     ```
 
-See the [`defaults/main.yml`](defaults/main.yml) file for a more thorough example.
+See the [`defaults/main.yaml`](defaults/main.yaml) file for a more thorough example.
