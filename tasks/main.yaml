@@ -1,8 +1,9 @@
 ---
 - name: Install Lighttpd.
-  package:
+  apt:
     name: lighttpd
     state: present
+    update_cache: true
 
 - name: Write Lighttpd configuration file.
   template:

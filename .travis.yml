@@ -20,7 +20,6 @@ jobs:
     #       https://www.balena.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/
     #       In the mean time, allow this to fail.
     - env: docker_repo=resin/rpi-raspbian
-    - env: docker_repo=geerlingguy/docker-debian10-ansible
     - env: docker_repo=geerlingguy/docker-centos8-ansible
     - env: docker_repo=geerlingguy/docker-fedora30-ansible
 
@@ -34,12 +33,17 @@ install:
     --publish 80:80
     ${docker_repo}:latest > ${container_id}
 
+  - >
+    pip_cmd=$(docker container exec --tty $(cat ${container_id}) env TERM=xterm
+    /bin/bash -c "/usr/bin/which pip3 || /usr/bin/which pip")
+  - pip_cmd=$(echo -n ${pip_cmd} | tr -d "\r\n")
+
   # Bootstrap to ensure Ansible is available in the container.
   # This is to ensure that the containers not already pre-imaged with
   # Ansible installed (i.e., Raspbian image) will have it available.
   - >
     docker container exec --tty $(cat ${container_id}) env TERM=xterm
-    pip install ansible
+    ${pip_cmd} install ansible
 
 script:
   # Check Ansible role/playbook syntax.
