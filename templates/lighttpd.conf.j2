@@ -2,7 +2,7 @@
 # {{ ansible_managed }}
 {% for item in lighttpd_config recursive %}
 {% set outer_loop = loop %}
-{% with option_key, option_value = item.items()[0] %}
+{% with option_key, option_value = item.items() | list | first %}
 {% if "conditional" == option_key %}
 {% for condition in option_value %}
 {% if not loop.first %}else {% endif %}{{ condition.field }} {{ condition.operator }} "{{ condition.value }}" {
