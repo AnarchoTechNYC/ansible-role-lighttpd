@@ -70,6 +70,8 @@ lighttpd_config:
   # the `+` is interpreted by Lighttpd itself when it parses resulting
   # template written from this variable.
   - include_shell: '"/usr/share/lighttpd/use-ipv6.pl " + server.port'
+  # NOTE: In Debian 10 Buster's package, this is changed to
+  #       /usr/share/lighttpd/create-mime.conf.pl
   - include_shell: '"/usr/share/lighttpd/create-mime.assign.pl"'
   - alias:
       url: []

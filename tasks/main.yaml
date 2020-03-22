@@ -1,9 +1,15 @@
 ---
-- name: Install Lighttpd.
+- name: Install Lighttpd (Debian).
+  when: ansible_os_family == "Debian"
   apt:
     name: lighttpd
-    state: present
     update_cache: true
+
+- name: Install Lighttpd (RedHat).
+  when: ansible_os_family == "Debian"
+  package:
+    name: lighttpd
+    state: present
 
 - name: Write Lighttpd configuration file.
   template:
